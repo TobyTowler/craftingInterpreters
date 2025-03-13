@@ -1,21 +1,19 @@
 #include "scanner.h"
 #include "Lox.h"
 #include <cstddef>
+#include <fstream>
 #include <iostream>
-#include <string>
-#include <vector>
-
-using namespace std;
+#include <stdexcept>
 
 bool hadError = false;
 
 void inputPrompt() {
-    string line;
-    string input;
+    std::string line;
+    std::string input;
 
     for (;;) {
-        cout << "> ";
-        cin >> line;
+        std::cout << "> ";
+        std::cin >> line;
         input += line;
         if (line == "")
             break;
@@ -23,19 +21,32 @@ void inputPrompt() {
         hadError = false;
     }
 }
+static std::vector<std::byte> runFile(std::string path) {
+    std::ifstream file(path, std::ios::binary | std::ios::ate);
 
-void run(string input) {
+    if (!file.is_open()) {
+        throw std::runtime_error("Could not open source file");
+    }
+    std::streamsize size = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    std::vector<std::byte> buffer(size);
+
+    return buffer;
+}
+
+void run(std::string input) {
     Scanner scanner = scanner(input);
     vector<Token> tokens = scanner.tokens;
 
     for (Token t : input) {
-        cout << t;
+        std::cout << t;
     }
 }
 
-void error(int line, string message) { report(line, "", message;) }
+void error(int line, std::string message) { report(line, "", message); }
 
-void report(int line, string where, string message) {
-    cout << "Line " << line << "ERROR " << where << ": " << message;
+void report(int line, std::string where, std::string message) {
+    std::cout << "Line " << line << "ERROR " << where << ": " << message;
     hadError = true;
 }
